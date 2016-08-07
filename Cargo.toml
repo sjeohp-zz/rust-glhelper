@@ -1,0 +1,14 @@
+[package]
+name = "glhelper"
+version = "0.1.4"
+authors = ["Joseph A Mark <sjeohp@gmail.com>"]
+license = "MIT"
+description = "Convenience methods for opengl."
+
+[lib]
+name = "glhelper"
+path = "src/lib.rs"
+
+[dependencies]
+nalgebra = "0.8.2"
+gl = "0.6.0"
