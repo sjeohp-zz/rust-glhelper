@@ -1,6 +1,6 @@
 [package]
 name = "glhelpe6"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["Joseph A Mark <sjeohp@gmail.com>"]
 license = "MIT"
 description = "Convenience methods for opengl."

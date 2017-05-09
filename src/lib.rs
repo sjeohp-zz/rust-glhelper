@@ -22,7 +22,7 @@ pub static QUAD_DATA: [GLfloat; 20] =
 
 pub static mut LINE_DATA: [GLfloat; 10000] = [0.; 10000];
 
-pub fn add_path_line(path: &Vec<(f32, f32)>, path_edges: usize, line_program: GLuint, line_vao: GLuint, line_vbo: GLuint)
+pub fn add_path_line(path: &[(f32, f32)], path_edges: usize, line_program: GLuint, line_vao: GLuint, line_vbo: GLuint)
 {
 	let mut offset: usize = 0;
 	let stride = 16;
