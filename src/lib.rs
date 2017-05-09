@@ -2,11 +2,8 @@
 #![crate_type = "lib"]
 
 extern crate gl;
-extern crate nalgebra;
 
 use self::gl::types::{GLenum, GLint, GLuint, GLchar, GLfloat, GLsizeiptr};
-
-use self::nalgebra::{Vector2};
 
 use std::io::{BufReader, Read};
 use std::fs::File;
@@ -25,7 +22,7 @@ pub static QUAD_DATA: [GLfloat; 20] =
 
 pub static mut LINE_DATA: [GLfloat; 10000] = [0.; 10000];
 
-pub fn add_path_line(path: &Vec<Vector2<f32>>, path_edges: usize, line_program: GLuint, line_vao: GLuint, line_vbo: GLuint)
+pub fn add_path_line(path: &Vec<(f32, f32)>, path_edges: usize, line_program: GLuint, line_vao: GLuint, line_vbo: GLuint)
 {
 	let mut offset: usize = 0;
 	let stride = 16;
@@ -33,22 +30,22 @@ pub fn add_path_line(path: &Vec<Vector2<f32>>, path_edges: usize, line_program: 
 	{
 		for i in 0..path_edges
 		{
-			let normalx = path[i+1].y - path[i].y;
-			let normaly = path[i].x - path[i+1].x;
-			LINE_DATA[offset+0] = path[i].x;
-			LINE_DATA[offset+1] = path[i].y;
+			let normalx = path[i+1].1 - path[i].1;
+			let normaly = path[i].0 - path[i+1].0;
+			LINE_DATA[offset+0] = path[i].0;
+			LINE_DATA[offset+1] = path[i].1;
 			LINE_DATA[offset+2] = -normalx;
 			LINE_DATA[offset+3] = -normaly;
-			LINE_DATA[offset+4] = path[i].x;
-			LINE_DATA[offset+5] = path[i].y;
+			LINE_DATA[offset+4] = path[i].0;
+			LINE_DATA[offset+5] = path[i].1;
 			LINE_DATA[offset+6] = normalx;
 			LINE_DATA[offset+7] = normaly;
-			LINE_DATA[offset+8] = path[i+1].x;
-			LINE_DATA[offset+9] = path[i+1].y;
+			LINE_DATA[offset+8] = path[i+1].0;
+			LINE_DATA[offset+9] = path[i+1].1;
 			LINE_DATA[offset+10] = -normalx;
 			LINE_DATA[offset+11] = -normaly;
-			LINE_DATA[offset+12] = path[i+1].x;
-			LINE_DATA[offset+13] = path[i+1].y;
+			LINE_DATA[offset+12] = path[i+1].0;
+			LINE_DATA[offset+13] = path[i+1].1;
 			LINE_DATA[offset+14] = normalx;
 			LINE_DATA[offset+15] = normaly;
 			offset += stride;
