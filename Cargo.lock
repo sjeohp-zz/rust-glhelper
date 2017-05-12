@@ -1,6 +1,6 @@
 [root]
 name = "glhelper"
-version = "0.1.9"
+version = "0.1.10"
 dependencies = [
  "gl 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "sdl2 0.29.1 (registry+https://github.com/rust-lang/crates.io-index)",

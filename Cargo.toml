@@ -1,6 +1,6 @@
 [package]
 name = "glhelper"
-version = "0.1.9"
+version = "0.1.10"
 authors = ["Joseph A Mark <sjeohp@gmail.com>"]
 license = "MIT"
 description = "Convenience methods for opengl."

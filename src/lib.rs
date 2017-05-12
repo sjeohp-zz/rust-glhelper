@@ -20,46 +20,6 @@ pub static QUAD_DATA: [GLfloat; 20] =
 	 1., -1., 0.0, 1.0, 1.0
 ];
 
-pub static mut LINE_DATA: [GLfloat; 10000] = [0.; 10000];
-
-pub fn add_path_line(path: &[(f32, f32)], path_edges: usize, line_program: GLuint, line_vao: GLuint, line_vbo: GLuint)
-{
-	let mut offset: usize = 0;
-	let stride = 16;
-	unsafe
-	{
-		for i in 0..path_edges
-		{
-			let normalx = path[i+1].1 - path[i].1;
-			let normaly = path[i].0 - path[i+1].0;
-			LINE_DATA[offset+0] = path[i].0;
-			LINE_DATA[offset+1] = path[i].1;
-			LINE_DATA[offset+2] = -normalx;
-			LINE_DATA[offset+3] = -normaly;
-			LINE_DATA[offset+4] = path[i].0;
-			LINE_DATA[offset+5] = path[i].1;
-			LINE_DATA[offset+6] = normalx;
-			LINE_DATA[offset+7] = normaly;
-			LINE_DATA[offset+8] = path[i+1].0;
-			LINE_DATA[offset+9] = path[i+1].1;
-			LINE_DATA[offset+10] = -normalx;
-			LINE_DATA[offset+11] = -normaly;
-			LINE_DATA[offset+12] = path[i+1].0;
-			LINE_DATA[offset+13] = path[i+1].1;
-			LINE_DATA[offset+14] = normalx;
-			LINE_DATA[offset+15] = normaly;
-			offset += stride;
-		}
-		gl::UseProgram(line_program);
-		gl::BindVertexArray(line_vao);
-		gl::BindBuffer(gl::ARRAY_BUFFER, line_vbo);
-		gl::BufferSubData(gl::ARRAY_BUFFER, 0, (path_edges * stride * mem::size_of::<GLfloat>()) as GLsizeiptr as isize, mem::transmute(&LINE_DATA[0]));
-		gl::BindBuffer(gl::ARRAY_BUFFER, 0);
-		gl::BindVertexArray(0);
-		gl::UseProgram(0);
-	}
-}
-
 pub fn compile_shader(src: &'static str, shader_type: GLenum) -> GLuint
 {
     let shader;
@@ -149,6 +109,49 @@ pub fn check_gl_error(file: &'static str, line: u32)
 		}
 	}
 }
+
+// pub static mut LINE_DATA: [GLfloat; 10000] = [0.; 10000];
+
+pub fn add_path_line(path: &[(f32, f32)], path_edges: usize, line_program: GLuint, line_vao: GLuint, line_vbo: GLuint)
+{
+	let mut LINE_DATA: Vec<f32> = vec![0.0; path_edges];
+	let mut offset: usize = 0;
+	let stride = 16;
+
+	unsafe
+	{
+		for i in 0..path_edges
+		{
+			let normalx = path[i+1].1 - path[i].1;
+			let normaly = path[i].0 - path[i+1].0;
+			LINE_DATA[offset+0] = path[i].0;
+			LINE_DATA[offset+1] = path[i].1;
+			LINE_DATA[offset+2] = -normalx;
+			LINE_DATA[offset+3] = -normaly;
+			LINE_DATA[offset+4] = path[i].0;
+			LINE_DATA[offset+5] = path[i].1;
+			LINE_DATA[offset+6] = normalx;
+			LINE_DATA[offset+7] = normaly;
+			LINE_DATA[offset+8] = path[i+1].0;
+			LINE_DATA[offset+9] = path[i+1].1;
+			LINE_DATA[offset+10] = -normalx;
+			LINE_DATA[offset+11] = -normaly;
+			LINE_DATA[offset+12] = path[i+1].0;
+			LINE_DATA[offset+13] = path[i+1].1;
+			LINE_DATA[offset+14] = normalx;
+			LINE_DATA[offset+15] = normaly;
+			offset += stride;
+		}
+		gl::UseProgram(line_program);
+		gl::BindVertexArray(line_vao);
+		gl::BindBuffer(gl::ARRAY_BUFFER, line_vbo);
+		gl::BufferSubData(gl::ARRAY_BUFFER, 0, (path_edges * stride * mem::size_of::<GLfloat>()) as GLsizeiptr as isize, mem::transmute(&LINE_DATA[0]));
+		gl::BindBuffer(gl::ARRAY_BUFFER, 0);
+		gl::BindVertexArray(0);
+		gl::UseProgram(0);
+	}
+}
+
 
 #[cfg(test)]
 mod tests {
