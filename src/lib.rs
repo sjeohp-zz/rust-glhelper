@@ -112,11 +112,12 @@ pub fn check_gl_error(file: &'static str, line: u32)
 
 // pub static mut LINE_DATA: [GLfloat; 10000] = [0.; 10000];
 
+pub const STRIDE: usize = 16;
+
 pub fn add_path_line(path: &[(f32, f32)], path_edges: usize, line_program: GLuint, line_vao: GLuint, line_vbo: GLuint)
 {
-	let mut LINE_DATA: Vec<f32> = vec![0.0; path_edges];
+	let mut LINE_DATA: Vec<f32> = vec![0.0; path_edges*STRIDE];
 	let mut offset: usize = 0;
-	let stride = 16;
 
 	unsafe
 	{
@@ -140,12 +141,12 @@ pub fn add_path_line(path: &[(f32, f32)], path_edges: usize, line_program: GLuin
 			LINE_DATA[offset+13] = path[i+1].1;
 			LINE_DATA[offset+14] = normalx;
 			LINE_DATA[offset+15] = normaly;
-			offset += stride;
+			offset += STRIDE;
 		}
 		gl::UseProgram(line_program);
 		gl::BindVertexArray(line_vao);
 		gl::BindBuffer(gl::ARRAY_BUFFER, line_vbo);
-		gl::BufferSubData(gl::ARRAY_BUFFER, 0, (path_edges * stride * mem::size_of::<GLfloat>()) as GLsizeiptr as isize, mem::transmute(&LINE_DATA[0]));
+		gl::BufferSubData(gl::ARRAY_BUFFER, 0, (path_edges * STRIDE * mem::size_of::<GLfloat>()) as GLsizeiptr as isize, mem::transmute(&LINE_DATA[0]));
 		gl::BindBuffer(gl::ARRAY_BUFFER, 0);
 		gl::BindVertexArray(0);
 		gl::UseProgram(0);
