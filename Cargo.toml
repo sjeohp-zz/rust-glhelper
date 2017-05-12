@@ -1,6 +1,6 @@
 [package]
 name = "glhelper"
-version = "0.1.8"
+version = "0.1.9"
 authors = ["Joseph A Mark <sjeohp@gmail.com>"]
 license = "MIT"
 description = "Convenience methods for opengl."
@@ -12,3 +12,6 @@ path = "src/lib.rs"
 
 [dependencies]
 gl = "0.6.1"
+
+[dev-dependencies]
+sdl2 = "0.29.1"

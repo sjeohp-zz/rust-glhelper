@@ -60,41 +60,8 @@ pub fn add_path_line(path: &[(f32, f32)], path_edges: usize, line_program: GLuin
 	}
 }
 
-pub fn check_gl_error(file: &'static str, line: u32)
+pub fn compile_shader(src: &'static str, shader_type: GLenum) -> GLuint
 {
-	unsafe
-	{
-		loop
-		{
-			let err_str: &'static str = match gl::GetError()
-			{
-				gl::NO_ERROR => { break },
-				gl::INVALID_OPERATION => { "INVALID_OPERATION" },
-				gl::INVALID_ENUM => { "INVALID_ENUM" },
-				gl::INVALID_VALUE => { "INVALID_VALUE" },
-				gl::OUT_OF_MEMORY => { "OUT_OF_MEMROY" },
-				gl::INVALID_FRAMEBUFFER_OPERATION => { "INVALID_FRAMEBUFFER_OPERATION" }
-				_ => { "" }
-			};
-			println!("GL_{}: {}, {}", err_str, file, line);
-		}
-	}
-}
-
-pub fn compile_shader(filename: &str, shader_type: GLenum) -> GLuint
-{
-
-	let file = match File::open(filename) {
-		Ok(file) => file,
-		Err(..) => panic!("opening {}", filename)
-	};
-	let mut reader = BufReader::new(&file);
-	let src = &mut String::new();
-	match reader.read_to_string(src) {
-		Ok(_) => {},
-		Err(..) => panic!("reading {}", filename)
-	}
-
     let shader;
     unsafe {
         shader = gl::CreateShader(shader_type);
@@ -136,10 +103,10 @@ pub fn link_program(vs: GLuint, fs: GLuint) -> GLuint
 	}
 }
 
-pub fn load_program(vfilename: &str, ffilename: &str, shaders: &mut Vec<GLuint>) -> GLuint
+pub fn load_program(vsrc: &'static str, fsrc: &'static str, shaders: &mut Vec<GLuint>) -> GLuint
 {
-	let vs = compile_shader(vfilename, gl::VERTEX_SHADER);
-	let fs = compile_shader(ffilename, gl::FRAGMENT_SHADER);
+	let vs = compile_shader(vsrc, gl::VERTEX_SHADER);
+	let fs = compile_shader(fsrc, gl::FRAGMENT_SHADER);
 
 	let program = link_program(vs, fs);
 
@@ -149,10 +116,10 @@ pub fn load_program(vfilename: &str, ffilename: &str, shaders: &mut Vec<GLuint>)
 	program
 }
 
-pub fn load_program_with_shader_outs(vfilename: &str, vout: &mut GLuint, ffilename: &str, fout: &mut GLuint) -> GLuint
+pub fn load_program_with_shader_outs(vsrc: &'static str, vout: &mut GLuint, fsrc: &'static str, fout: &mut GLuint) -> GLuint
 {
-	let vs = compile_shader(vfilename, gl::VERTEX_SHADER);
-	let fs = compile_shader(ffilename, gl::FRAGMENT_SHADER);
+	let vs = compile_shader(vsrc, gl::VERTEX_SHADER);
+	let fs = compile_shader(fsrc, gl::FRAGMENT_SHADER);
 
 	let program = link_program(vs, fs);
 
@@ -162,9 +129,85 @@ pub fn load_program_with_shader_outs(vfilename: &str, vout: &mut GLuint, ffilena
 	program
 }
 
+pub fn check_gl_error(file: &'static str, line: u32)
+{
+	unsafe
+	{
+		loop
+		{
+			let err_str: &'static str = match gl::GetError()
+			{
+				gl::NO_ERROR => { break },
+				gl::INVALID_OPERATION => { "INVALID_OPERATION" },
+				gl::INVALID_ENUM => { "INVALID_ENUM" },
+				gl::INVALID_VALUE => { "INVALID_VALUE" },
+				gl::OUT_OF_MEMORY => { "OUT_OF_MEMROY" },
+				gl::INVALID_FRAMEBUFFER_OPERATION => { "INVALID_FRAMEBUFFER_OPERATION" }
+				_ => { "" }
+			};
+			println!("GL_{}: {}, {}", err_str, file, line);
+		}
+	}
+}
+
 #[cfg(test)]
 mod tests {
+	extern crate sdl2;
+	use self::sdl2::video::{GLProfile};
+	use self::sdl2::rect::Rect;
+	use self::sdl2::event::{Event};
+
+	use std::os::raw::c_void;
+
+	use super::*;	
+
     #[test]
     fn it_works() {
+
+    	let sdl = sdl2::init().unwrap();
+    	let video_subsystem = sdl.video().unwrap();
+    	let gl_attr = video_subsystem.gl_attr();
+
+    	gl_attr.set_context_flags().debug().set();
+    	gl_attr.set_context_version(3, 3);
+    	gl_attr.set_context_profile(GLProfile::Core);
+    	gl_attr.set_multisample_buffers(1);
+    	gl_attr.set_multisample_samples(4);
+    	gl_attr.set_double_buffer(true);
+    	gl_attr.set_depth_size(24);
+
+    	let window_bounds = Rect::new(100, 100, 500, 500);
+    	let mut window = video_subsystem.window(
+    	    "glhelper test", 
+    	    window_bounds.width(), 
+    	    window_bounds.height())
+    	.position(
+    	    window_bounds.x(), 
+    	    window_bounds.y())
+    	.opengl().build().unwrap();
+
+    	let context = match window.gl_create_context() {
+    	    Ok(res) => res,
+    	    Err(..) => panic!("Could not open vert shader")
+    	};
+    	match window.gl_make_current(&context) {
+    	    Ok(_) => {},
+    	    Err(..) => panic!("setting current context")
+    	}
+
+    	// assert_eq!(gl_attr.context_profile(), GLProfile::Core);
+    	// assert_eq!(gl_attr.context_version(), (3, 3));
+
+    	gl::load_with(|s| video_subsystem.gl_get_proc_address(s) as *const c_void);
+
+    	// video_subsystem.gl_set_swap_interval(1);
+
+    	let mut shaders: Vec<GLuint> = vec![];
+    	let vsrc = include_str!("../shaders/line.vert.glsl");
+    	let fsrc = include_str!("../shaders/line.frag.glsl");
+    	let line_program = load_program(
+    	    vsrc, 
+    	    fsrc, 
+    	    &mut shaders);
     }
 }
